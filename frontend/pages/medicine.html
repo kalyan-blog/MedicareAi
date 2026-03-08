@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicines - MEDICARE AI</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-heartbeat"></i>
+                MEDICARE AI
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="../index.html" class="nav-link">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a href="medicine.html" class="nav-link">Medicines</a>
+                </li>
+                <li class="nav-item">
+                    <a href="diseases.html" class="nav-link">Diseases</a>
+                </li>
+                <li class="nav-item">
+                    <a href="chat.html" class="nav-link">AI Assistant</a>
+                </li>
+                <li class="nav-item">
+                    <a href="login.html" class="nav-link">Login</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1 style="text-align: center; margin: 2rem 0; color: var(--dark-green);">Medicine Database</h1>
+        
+        <div class="filters">
+            <select id="sortSelect" class="filter-select">
+                <option value="">Sort by</option>
+                <option value="name">Name</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+            </select>
+            
+            <select id="categorySelect" class="filter-select">
+                <option value="all">All Categories</option>
+            </select>
+
+            <input type="text" id="searchInput" class="filter-select" placeholder="Search medicines..." style="flex:1; min-width:200px;">
+        </div>
+
+        <div id="medicinesContainer" class="cards-grid">
+            <p style="text-align:center; grid-column:1/-1;">Loading medicines...</p>
+        </div>
+    </div>
+
+    <script src="../js/main.js"></script>
+    <script>
+        let allMedicines = [];
+
+        async function loadMedicines() {
+            const sort = document.getElementById('sortSelect').value;
+            const category = document.getElementById('categorySelect').value;
+            
+            const medicines = await medicareAI.loadMedicines(sort, category);
+            allMedicines = medicines;
+            populateCategories(medicines);
+            filterAndDisplay();
+        }
+
+        function populateCategories(medicines) {
+            const select = document.getElementById('categorySelect');
+            const current = select.value;
+            const categories = [...new Set(medicines.map(m => m.category).filter(Boolean))].sort();
+            
+            // Only rebuild if options have changed
+            if (select.options.length - 1 !== categories.length) {
+                select.innerHTML = '<option value="all">All Categories</option>';
+                categories.forEach(cat => {
+                    const opt = document.createElement('option');
+                    opt.value = cat;
+                    opt.textContent = cat;
+                    select.appendChild(opt);
+                });
+                select.value = current || 'all';
+            }
+        }
+
+        function filterAndDisplay() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = search
+                ? allMedicines.filter(m => m.name.toLowerCase().includes(search) || m.uses.some(u => u.toLowerCase().includes(search)) || (m.symptoms && m.symptoms.some(s => s.toLowerCase().includes(search))))
+                : allMedicines;
+            displayMedicines(filtered);
+        }
+
+        function displayMedicines(medicines) {
+            const container = document.getElementById('medicinesContainer');
+            
+            if (medicines.length === 0) {
+                container.innerHTML = '<p style="grid-column:1/-1; text-align:center;">No medicines found.</p>';
+                return;
+            }
+
+            container.innerHTML = medicines.map(medicine => `
+                <div class="card">
+                    <h3>${medicine.name}</h3>
+                    <div class="card-price">₹${medicine.price}</div>
+                    <p><strong>Uses:</strong> ${medicine.uses.join(', ')}</p>
+                    ${medicine.symptoms && medicine.symptoms.length ? `<p><strong>Symptoms:</strong> ${medicine.symptoms.join(', ')}</p>` : ''}
+                    <p><strong>Category:</strong> ${medicine.category || 'General'}</p>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('sortSelect').addEventListener('change', loadMedicines);
+        document.getElementById('categorySelect').addEventListener('change', loadMedicines);
+        document.getElementById('searchInput').addEventListener('input', filterAndDisplay);
+
+        loadMedicines();
+    </script>
+</body>
+</html>

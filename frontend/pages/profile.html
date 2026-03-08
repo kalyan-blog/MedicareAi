@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - MEDICARE AI</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-heartbeat"></i>
+                MEDICARE AI
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="../index.html" class="nav-link">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a href="medicine.html" class="nav-link">Medicines</a>
+                </li>
+                <li class="nav-item">
+                    <a href="diseases.html" class="nav-link">Diseases</a>
+                </li>
+                <li class="nav-item">
+                    <a href="chat.html" class="nav-link">AI Assistant</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="medicareAI.logout()">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1 style="text-align: center; margin: 2rem 0; color: var(--dark-green);">User Profile</h1>
+        
+        <div class="profile-container">
+            <div class="profile-card">
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <h2 id="userName">Loading...</h2>
+                    <p id="userEmail" class="profile-email">Loading...</p>
+                </div>
+                
+                <div class="profile-info">
+                    <div class="info-item">
+                        <label><i class="fas fa-id-card"></i> User ID:</label>
+                        <span id="userId">Loading...</span>
+                    </div>
+                    <div class="info-item">
+                        <label><i class="fas fa-calendar-alt"></i> Member Since:</label>
+                        <span id="memberSince">Loading...</span>
+                    </div>
+                    <div class="info-item">
+                        <label><i class="fas fa-comments"></i> Total Chats:</label>
+                        <span id="totalChats">0</span>
+                    </div>
+                    <div class="info-item">
+                        <label><i class="fas fa-history"></i> Last Active:</label>
+                        <span id="lastActive">Just now</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-sections">
+                <!-- Chat History Section -->
+                <div class="profile-section">
+                    <h3><i class="fas fa-comment-medical"></i> Chat History</h3>
+                    <div id="chatHistory" class="chat-history">
+                        <div class="loading-message">Loading your chat history...</div>
+                    </div>
+                </div>
+
+                <!-- Medical History Section -->
+                <div class="profile-section">
+                    <h3><i class="fas fa-file-medical"></i> Medical History</h3>
+                    <div id="medicalHistory" class="medical-history">
+                        <p>No medical history recorded yet.</p>
+                        <button class="btn btn-secondary" onclick="addMedicalRecord()">
+                            <i class="fas fa-plus"></i> Add Medical Record
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Account Settings Section -->
+                <div class="profile-section">
+                    <h3><i class="fas fa-cog"></i> Account Settings</h3>
+                    <div class="settings-options">
+                        <button class="btn btn-primary" onclick="changePassword()">
+                            <i class="fas fa-key"></i> Change Password
+                        </button>
+                        <button class="btn btn-secondary" onclick="updateProfile()">
+                            <i class="fas fa-edit"></i> Update Profile
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteAccount()">
+                            <i class="fas fa-trash"></i> Delete Account
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Medical Record Modal -->
+    <div id="medicalRecordModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeMedicalModal()">&times;</span>
+            <h3>Add Medical Record</h3>
+            <form id="medicalRecordForm">
+                <div class="form-group">
+                    <label for="condition">Medical Condition</label>
+                    <input type="text" id="condition" name="condition" required>
+                </div>
+                <div class="form-group">
+                    <label for="diagnosisDate">Diagnosis Date</label>
+                    <input type="date" id="diagnosisDate" name="diagnosisDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="notes">Notes</label>
+                    <textarea id="notes" name="notes" rows="4" placeholder="Additional notes about your condition..."></textarea>
+                </div>
+                <div class="form-buttons">
+                    <button type="button" class="btn btn-secondary" onclick="closeMedicalModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Record</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="../js/main.js"></script>
+    <script>
+        // Check authentication on page load
+        if (!medicareAI.currentUser) {
+            window.location.href = 'login.html';
+        }
+
+        // Load profile data
+        async function loadProfile() {
+            try {
+                const user = medicareAI.currentUser;
+                if (!user) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                // Update basic user info
+                document.getElementById('userName').textContent = user.name;
+                document.getElementById('userEmail').textContent = user.email;
+                document.getElementById('userId').textContent = user.id;
+
+                // Load detailed user profile from backend
+                const profileData = await medicareAI.getUserProfile(user.id);
+                if (profileData) {
+                    // Format member since date
+                    const memberSince = new Date(profileData.created_at).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
+                    document.getElementById('memberSince').textContent = memberSince;
+
+                    // Load chat history
+                    loadChatHistory(profileData.chat_history);
+
+                    // Load medical history
+                    loadMedicalHistory(profileData.medical_history);
+                }
+
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                medicareAI.showNotification('Failed to load profile data', 'error');
+            }
+        }
+
+        function loadChatHistory(chatHistory) {
+            const chatHistoryContainer = document.getElementById('chatHistory');
+            
+            if (!chatHistory || chatHistory.length === 0) {
+                chatHistoryContainer.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-comment-slash"></i>
+                        <p>No chat history yet</p>
+                        <a href="chat.html" class="btn btn-primary">Start Chatting</a>
+                    </div>
+                `;
+                return;
+            }
+
+            // Update total chats count
+            document.getElementById('totalChats').textContent = chatHistory.length;
+
+            // Display recent chats (last 5)
+            const recentChats = chatHistory.slice(-5).reverse();
+            
+            chatHistoryContainer.innerHTML = recentChats.map(chat => `
+                <div class="chat-history-item">
+                    <div class="chat-question">
+                        <strong>Q:</strong> ${chat.query.substring(0, 100)}${chat.query.length > 100 ? '...' : ''}
+                    </div>
+                    <div class="chat-answer">
+                        <strong>A:</strong> ${chat.response.substring(0, 150)}${chat.response.length > 150 ? '...' : ''}
+                    </div>
+                    <div class="chat-date">
+                        ${new Date(chat.date).toLocaleDateString()} • 
+                        ${new Date(chat.date).toLocaleTimeString()}
+                    </div>
+                </div>
+            `).join('');
+
+            // Add view all button if there are more chats
+            if (chatHistory.length > 5) {
+                const viewAllBtn = document.createElement('button');
+                viewAllBtn.className = 'btn btn-secondary view-all-btn';
+                viewAllBtn.innerHTML = '<i class="fas fa-list"></i> View All Chats';
+                viewAllBtn.onclick = () => showAllChats(chatHistory);
+                chatHistoryContainer.appendChild(viewAllBtn);
+            }
+        }
+
+        function loadMedicalHistory(medicalHistory) {
+            const medicalHistoryContainer = document.getElementById('medicalHistory');
+            
+            if (!medicalHistory || medicalHistory.length === 0) {
+                medicalHistoryContainer.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-file-medical-alt"></i>
+                        <p>No medical records yet</p>
+                        <button class="btn btn-primary" onclick="addMedicalRecord()">
+                            <i class="fas fa-plus"></i> Add First Record
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            medicalHistoryContainer.innerHTML = medicalHistory.map(record => `
+                <div class="medical-record-item">
+                    <div class="record-header">
+                        <h4>${record.condition}</h4>
+                        <span class="record-date">${new Date(record.date).toLocaleDateString()}</span>
+                    </div>
+                    <p class="record-notes">${record.notes || 'No additional notes'}</p>
+                </div>
+            `).join('') + `
+                <button class="btn btn-primary" onclick="addMedicalRecord()" style="margin-top: 1rem;">
+                    <i class="fas fa-plus"></i> Add New Record
+                </button>
+            `;
+        }
+
+        // Medical Record Modal Functions
+        function addMedicalRecord() {
+            document.getElementById('medicalRecordModal').style.display = 'block';
+            document.getElementById('diagnosisDate').valueAsDate = new Date();
+        }
+
+        function closeMedicalModal() {
+            document.getElementById('medicalRecordModal').style.display = 'none';
+            document.getElementById('medicalRecordForm').reset();
+        }
+
+        // Placeholder functions for future implementation
+        function changePassword() {
+            medicareAI.showNotification('Password change feature coming soon!', 'info');
+        }
+
+        function updateProfile() {
+            medicareAI.showNotification('Profile update feature coming soon!', 'info');
+        }
+
+        function deleteAccount() {
+            if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+                medicareAI.showNotification('Account deletion feature coming soon!', 'info');
+            }
+        }
+
+        // Modal close when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('medicalRecordModal');
+            if (event.target === modal) {
+                closeMedicalModal();
+            }
+        }
+
+        // Load profile when page loads
+        document.addEventListener('DOMContentLoaded', loadProfile);
+    </script>
+
+    <style>
+        .profile-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .profile-card {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .profile-header {
+            margin-bottom: 2rem;
+        }
+
+        .profile-avatar {
+            font-size: 4rem;
+            color: var(--primary-green);
+            margin-bottom: 1rem;
+        }
+
+        .profile-email {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .profile-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: var(--light-green);
+            border-radius: 8px;
+        }
+
+        .info-item label {
+            font-weight: bold;
+            color: var(--dark-green);
+        }
+
+        .profile-sections {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .profile-section {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .profile-section h3 {
+            color: var(--dark-green);
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--light-green);
+            padding-bottom: 0.5rem;
+        }
+
+        .chat-history-item {
+            background: var(--light-green);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--primary-green);
+        }
+
+        .chat-question, .chat-answer {
+            margin-bottom: 0.5rem;
+        }
+
+        .chat-date {
+            font-size: 0.9rem;
+            color: #666;
+            text-align: right;
+        }
+
+        .medical-record-item {
+            background: var(--light-green);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--secondary-green);
+        }
+
+        .record-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .record-header h4 {
+            margin: 0;
+            color: var(--dark-green);
+        }
+
+        .record-date {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .record-notes {
+            color: #555;
+            margin: 0;
+        }
+
+        .settings-options {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-danger {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #d32f2f;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #ccc;
+        }
+
+        .view-all-btn {
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: var(--white);
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-family: inherit;
+            resize: vertical;
+        }
+
+        @media (max-width: 768px) {
+            .profile-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .settings-options {
+                flex-direction: column;
+            }
+            
+            .modal-content {
+                margin: 10% auto;
+                width: 95%;
+            }
+        }
+    </style>
+</body>
+</html>

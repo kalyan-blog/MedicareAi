@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diseases - MEDICARE AI</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-heartbeat"></i>
+                MEDICARE AI
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="../index.html" class="nav-link">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a href="medicine.html" class="nav-link">Medicines</a>
+                </li>
+                <li class="nav-item">
+                    <a href="diseases.html" class="nav-link">Diseases</a>
+                </li>
+                <li class="nav-item">
+                    <a href="chat.html" class="nav-link">AI Assistant</a>
+                </li>
+                <li class="nav-item">
+                    <a href="login.html" class="nav-link">Login</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1 style="text-align: center; margin: 2rem 0; color: var(--dark-green);">Disease Information</h1>
+        
+        <div class="filters">
+            <input type="text" id="searchInput" class="filter-select" placeholder="Search diseases by name or symptom..." style="flex:1; min-width:300px;">
+        </div>
+
+        <div id="diseasesContainer" class="cards-grid">
+            <p style="text-align:center; grid-column:1/-1;">Loading diseases...</p>
+        </div>
+    </div>
+
+    <script src="../js/main.js"></script>
+    <script>
+        let allDiseases = [];
+
+        async function loadDiseases() {
+            const diseases = await medicareAI.loadDiseases();
+            allDiseases = diseases;
+            displayDiseases(diseases);
+        }
+
+        function filterAndDisplay() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = search
+                ? allDiseases.filter(d => d.name.toLowerCase().includes(search) || d.symptoms.some(s => s.toLowerCase().includes(search)))
+                : allDiseases;
+            displayDiseases(filtered);
+        }
+
+        function displayDiseases(diseases) {
+            const container = document.getElementById('diseasesContainer');
+            
+            if (diseases.length === 0) {
+                container.innerHTML = '<p style="grid-column:1/-1; text-align:center;">No disease information found.</p>';
+                return;
+            }
+
+            container.innerHTML = diseases.map(disease => `
+                <div class="card">
+                    <h3>${disease.name}</h3>
+                    <p><strong>Symptoms:</strong> ${disease.symptoms.join(', ')}</p>
+                    <p><strong>Treatment:</strong> ${disease.treatment.join(', ')}</p>
+                    <div class="card-price">Avg. Cost: ₹${disease.cost}</div>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('searchInput').addEventListener('input', filterAndDisplay);
+        loadDiseases();
+    </script>
+</body>
+</html>

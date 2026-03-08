@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - MEDICARE AI</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-heartbeat"></i>
+                MEDICARE AI
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="../index.html" class="nav-link">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a href="medicine.html" class="nav-link">Medicines</a>
+                </li>
+                <li class="nav-item">
+                    <a href="diseases.html" class="nav-link">Diseases</a>
+                </li>
+                <li class="nav-item">
+                    <a href="chat.html" class="nav-link">AI Assistant</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="form-container">
+        <h2>Login to MEDICARE AI</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Login</button>
+        </form>
+        <p style="text-align: center; margin-top: 1rem;">
+            Don't have an account? <a href="signup.html">Sign up here</a>
+        </p>
+    </div>
+
+    <script src="../js/main.js"></script>
+    <!-- Replace the script section in login.html -->
+<script>
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        
+        // Show loading state
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Logging in...';
+        submitBtn.disabled = true;
+        
+        await medicareAI.login(email, password);
+        
+        // Reset button state
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    });
+
+    // Check if user is already logged in
+    if (medicareAI.currentUser) {
+        window.location.href = '../index.html';
+    }
+</script>
+</body>
+</html>

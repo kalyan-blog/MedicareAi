@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+
+# Prisma generated
+backend/generated/
+
+# Lock files (optional - remove this line if you want to track package-lock.json)
+package-lock.json
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# IDE
+.vscode/
+.idea/

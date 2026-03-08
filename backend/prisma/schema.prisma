@@ -1,0 +1,46 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             Int      @id @default(autoincrement())
+  name           String   @db.VarChar(255)
+  email          String   @unique @db.VarChar(255)
+  password       String   @db.VarChar(255)
+  medicalHistory Json     @default("[]") @map("medical_history")
+  chatHistory    Json     @default("[]") @map("chat_history")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@map("users")
+}
+
+model Medicine {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  uses      String[]
+  symptoms  String[]
+  price     Decimal  @db.Decimal(10, 2)
+  category  String?  @db.VarChar(100)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("medicines")
+}
+
+model Disease {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  symptoms  String[]
+  treatment String[]
+  cost      Decimal  @db.Decimal(10, 2)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("diseases")
+}
