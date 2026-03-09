@@ -1,0 +1,13 @@
+{
+  "name": "medicare-ai",
+  "version": "1.0.0",
+  "description": "MEDICARE AI - Medical Assistant with Gemini AI",
+  "scripts": {
+    "start": "cd backend && node server.js",
+    "build": "cd backend && npm install && npx prisma generate",
+    "dev": "cd backend && npm run dev"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

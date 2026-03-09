@@ -34,8 +34,19 @@
         </div>
     </nav>
 
+    <div class="page-header">
+        <div class="container">
+            <div class="page-header-content">
+                <i class="fas fa-user-circle page-header-icon"></i>
+                <div>
+                    <h1>User Profile</h1>
+                    <p class="page-subtitle">Manage your medical records, chat history, and account settings</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
-        <h1 style="text-align: center; margin: 2rem 0; color: var(--dark-green);">User Profile</h1>
         
         <div class="profile-container">
             <div class="profile-card">
@@ -300,11 +311,24 @@
 
         .profile-card {
             background: var(--white);
-            border-radius: 15px;
-            padding: 2rem;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
             margin-bottom: 2rem;
             text-align: center;
+            border: 1px solid var(--border, #e2e8f0);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary-green), var(--secondary-green, #14b8a6), #10b981);
         }
 
         .profile-header {
@@ -315,17 +339,28 @@
             font-size: 4rem;
             color: var(--primary-green);
             margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--light-green), #ccfbf1);
+            width: 90px;
+            height: 90px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .profile-avatar i {
+            font-size: 2.5rem;
         }
 
         .profile-email {
-            color: #666;
-            font-size: 1.1rem;
+            color: #64748b;
+            font-size: 1.05rem;
         }
 
         .profile-info {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
+            gap: 1rem;
             margin-top: 2rem;
         }
 
@@ -333,59 +368,76 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1rem;
+            padding: 1rem 1.2rem;
             background: var(--light-green);
-            border-radius: 8px;
+            border-radius: 12px;
+            border: 1px solid rgba(13, 148, 136, 0.1);
         }
 
         .info-item label {
-            font-weight: bold;
+            font-weight: 600;
             color: var(--dark-green);
+            font-size: 0.9rem;
         }
 
         .profile-sections {
             display: grid;
-            gap: 2rem;
+            gap: 1.5rem;
         }
 
         .profile-section {
             background: var(--white);
-            border-radius: 15px;
+            border-radius: 16px;
             padding: 2rem;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+            border: 1px solid var(--border, #e2e8f0);
         }
 
         .profile-section h3 {
             color: var(--dark-green);
             margin-bottom: 1.5rem;
             border-bottom: 2px solid var(--light-green);
-            padding-bottom: 0.5rem;
+            padding-bottom: 0.8rem;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.1rem;
         }
 
         .chat-history-item {
             background: var(--light-green);
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1rem;
+            border-radius: 12px;
+            padding: 1.2rem;
+            margin-bottom: 0.8rem;
             border-left: 4px solid var(--primary-green);
+            transition: transform 0.2s ease;
+        }
+
+        .chat-history-item:hover {
+            transform: translateX(4px);
         }
 
         .chat-question, .chat-answer {
             margin-bottom: 0.5rem;
+            line-height: 1.5;
+            font-size: 0.92rem;
         }
 
         .chat-date {
-            font-size: 0.9rem;
-            color: #666;
+            font-size: 0.85rem;
+            color: #64748b;
             text-align: right;
         }
 
         .medical-record-item {
             background: var(--light-green);
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            border-left: 4px solid var(--secondary-green);
+            border-radius: 12px;
+            padding: 1.2rem;
+            margin-bottom: 0.8rem;
+            border-left: 4px solid var(--secondary-green, #14b8a6);
+            transition: transform 0.2s ease;
+        }
+
+        .medical-record-item:hover {
+            transform: translateX(4px);
         }
 
         .record-header {
@@ -401,13 +453,14 @@
         }
 
         .record-date {
-            color: #666;
-            font-size: 0.9rem;
+            color: #64748b;
+            font-size: 0.85rem;
         }
 
         .record-notes {
-            color: #555;
+            color: #475569;
             margin: 0;
+            font-size: 0.92rem;
         }
 
         .settings-options {
@@ -416,25 +469,33 @@
             flex-wrap: wrap;
         }
 
+        .settings-options .btn {
+            border-radius: 12px;
+            padding: 11px 22px;
+            font-size: 0.9rem;
+        }
+
         .btn-danger {
-            background: #f44336;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
             color: white;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
         }
 
         .btn-danger:hover {
-            background: #d32f2f;
+            box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4);
+            transform: translateY(-1px);
         }
 
         .empty-state {
             text-align: center;
-            padding: 2rem;
-            color: #666;
+            padding: 2.5rem;
+            color: #64748b;
         }
 
         .empty-state i {
             font-size: 3rem;
             margin-bottom: 1rem;
-            color: #ccc;
+            color: #cbd5e1;
         }
 
         .view-all-btn {
@@ -451,32 +512,41 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.5);
+            background-color: rgba(0,0,0,0.4);
+            backdrop-filter: blur(4px);
         }
 
         .modal-content {
             background-color: var(--white);
             margin: 5% auto;
-            padding: 2rem;
-            border-radius: 15px;
+            padding: 2.5rem;
+            border-radius: 20px;
             width: 90%;
             max-width: 500px;
             position: relative;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+            border: 1px solid var(--border, #e2e8f0);
+        }
+
+        .modal-content h3 {
+            font-family: 'Poppins', sans-serif;
+            color: var(--dark-green);
         }
 
         .close {
-            color: #aaa;
+            color: #94a3b8;
             float: right;
             font-size: 28px;
             font-weight: bold;
             cursor: pointer;
             position: absolute;
-            right: 1rem;
+            right: 1.2rem;
             top: 1rem;
+            transition: color 0.2s;
         }
 
         .close:hover {
-            color: #000;
+            color: var(--dark-green);
         }
 
         .form-buttons {
@@ -488,11 +558,20 @@
 
         textarea {
             width: 100%;
-            padding: 10px;
-            border: 2px solid #ddd;
-            border-radius: 5px;
-            font-family: inherit;
+            padding: 12px 16px;
+            border: 2px solid var(--border, #e2e8f0);
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
             resize: vertical;
+            background: #f8fafc;
+            transition: all 0.3s ease;
+        }
+
+        textarea:focus {
+            border-color: var(--primary-green);
+            outline: none;
+            background: var(--white);
+            box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.1);
         }
 
         @media (max-width: 768px) {

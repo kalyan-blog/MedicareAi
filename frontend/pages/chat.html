@@ -10,21 +10,21 @@
 .typing-indicator {
     display: flex;
     align-items: center;
-    color: #666;
+    color: #64748b;
     font-style: italic;
+    font-size: 0.9rem;
 }
 
 .typing-dots {
     display: flex;
     margin-left: 8px;
-    
 }
 
 .typing-dot {
-    width: 6px;
-    height: 6px;
+    width: 7px;
+    height: 7px;
     border-radius: 50%;
-    background-color: #666;
+    background: linear-gradient(135deg, var(--primary-green, #0d9488), var(--secondary-green, #14b8a6));
     margin: 0 2px;
     animation: typingAnimation 1.4s infinite ease-in-out;
 }
@@ -40,6 +40,208 @@
 .message pre {
     white-space: pre-wrap;
     font-family: inherit;
+}
+
+/* Chat input layout */
+.chat-input {
+    display: flex;
+    padding: 1rem 1.2rem;
+    gap: 10px;
+    align-items: flex-end;
+    background: var(--white, #fff);
+    border-top: 1px solid var(--border, #e2e8f0);
+}
+
+.chat-attachments {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.chat-action-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid var(--border, #e2e8f0);
+    background: var(--gray, #f8fafc);
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 1rem;
+}
+
+.chat-action-btn:hover {
+    border-color: var(--primary-green, #0d9488);
+    color: var(--primary-green, #0d9488);
+    background: var(--light-green, #f0fdfa);
+}
+
+.chat-action-btn.recording {
+    border-color: #ef4444;
+    background: #fef2f2;
+    color: #ef4444;
+    animation: pulse-recording 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-recording {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+    50% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+}
+
+.chat-input-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.chat-input-main input {
+    flex: 1;
+    padding: 10px 16px;
+    border: 2px solid var(--border, #e2e8f0);
+    border-radius: 50px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: var(--gray, #f8fafc);
+}
+
+.chat-input-main input:focus {
+    border-color: var(--primary-green, #0d9488);
+    outline: none;
+    background: var(--white, #fff);
+    box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.1);
+}
+
+/* File preview */
+.file-preview {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(135deg, var(--light-green, #f0fdfa), #ccfbf1);
+    border: 1px solid rgba(13, 148, 136, 0.2);
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    animation: fadeInUp 0.2s ease;
+}
+
+.file-preview-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--dark-green, #134e4a);
+    font-weight: 500;
+    min-width: 0;
+}
+
+.file-preview-info span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.file-preview-info i {
+    color: var(--primary-green, #0d9488);
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.file-remove-btn {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+    transition: color 0.2s;
+    flex-shrink: 0;
+}
+
+.file-remove-btn:hover {
+    color: #ef4444;
+}
+
+/* Voice preview */
+.voice-preview {
+    display: flex;
+    align-items: center;
+    background: #fef2f2;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    animation: fadeInUp 0.2s ease;
+}
+
+.voice-recording-indicator {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #dc2626;
+    font-weight: 500;
+    width: 100%;
+}
+
+.voice-pulse {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #ef4444;
+    animation: voice-pulse-anim 1s ease-in-out infinite;
+    flex-shrink: 0;
+}
+
+@keyframes voice-pulse-anim {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.7); }
+}
+
+#voiceTimer {
+    margin-left: auto;
+    font-variant-numeric: tabular-nums;
+    color: #94a3b8;
+}
+
+/* Message file badge */
+.message-file-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.2);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    margin: 6px 0;
+    border: 1px solid rgba(255,255,255,0.15);
+}
+
+.ai-message .message-file-badge {
+    background: var(--light-green, #f0fdfa);
+    border-color: rgba(13,148,136,0.15);
+    color: var(--dark-green, #134e4a);
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 600px) {
+    .chat-input {
+        padding: 0.8rem;
+        gap: 6px;
+    }
+    .chat-action-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 0.9rem;
+    }
 }
 </style>
 </head>
@@ -74,36 +276,250 @@
         <div class="chat-header">
             <h2><i class="fas fa-robot"></i> MEDICARE AI Assistant</h2>
             <p>Ask me anything about medical concerns, medicines, or diseases</p>
+            <div class="chat-header-badge"><i class="fas fa-bolt"></i> Powered by Google Gemini AI</div>
         </div>
         
         <div class="chat-messages" id="chatMessages">
     <div class="message ai-message">
         <strong>🤖 MEDICARE AI:</strong><br>
-        Hello! I'm your AI medical assistant powered by Google Gemini. I can provide general health information and answer your medical questions. Remember to always consult healthcare professionals for medical diagnoses and treatments. How can I help you today?
+        Hello! I'm your AI medical assistant powered by Google Gemini. I can help you with:<br><br>
+        💬 <strong>Text questions</strong> — Ask about symptoms, medicines, or health concerns<br>
+        📎 <strong>Report analysis</strong> — Upload medical reports, lab results, or prescriptions for AI analysis<br>
+        🎤 <strong>Voice input</strong> — Click the microphone to speak your question<br><br>
+        Remember to always consult healthcare professionals for medical diagnoses and treatments. How can I help you today?
     </div>
 </div>
         
         <div class="chat-input">
-            <input type="text" id="messageInput" placeholder="Type your medical question here...">
-            <button onclick="sendMessage()">Send</button>
+            <div class="chat-attachments">
+                <label for="fileUpload" class="chat-action-btn" title="Upload medical report">
+                    <i class="fas fa-paperclip"></i>
+                </label>
+                <input type="file" id="fileUpload" accept="image/*,.pdf" style="display:none;">
+                <button type="button" class="chat-action-btn" id="voiceBtn" title="Record voice message" onclick="toggleVoiceRecording()">
+                    <i class="fas fa-microphone"></i>
+                </button>
+
+            </div>
+            <div class="chat-input-main">
+                <div id="filePreview" class="file-preview" style="display:none;">
+                    <div class="file-preview-info">
+                        <i class="fas fa-file-medical"></i>
+                        <span id="fileName">file.pdf</span>
+                    </div>
+                    <button type="button" class="file-remove-btn" onclick="removeSelectedFile()">&times;</button>
+                </div>
+                <div id="voicePreview" class="voice-preview" style="display:none;">
+                    <div class="voice-recording-indicator">
+                        <span class="voice-pulse"></span>
+                        <span id="voiceStatus">Recording...</span>
+                        <span id="voiceTimer">0:00</span>
+                    </div>
+                </div>
+                <input type="text" id="messageInput" placeholder="Type your medical question here...">
+            </div>
+            <button onclick="sendMessage()"><i class="fas fa-paper-plane"></i> Send</button>
         </div>
     </div>
 
     <script src="../js/main.js"></script>
     <script>
-function addMessage(message, isUser = false) {
+let selectedFile = null;
+let mediaRecorder = null;
+let audioChunks = [];
+let isRecording = false;
+let voiceTimerInterval = null;
+let voiceSeconds = 0;
+
+// File upload handling
+document.getElementById('fileUpload').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate size (10MB)
+    if (file.size > 10 * 1024 * 1024) {
+        medicareAI.showNotification('File too large. Max 10MB allowed.', 'error');
+        this.value = '';
+        return;
+    }
+
+    selectedFile = file;
+    document.getElementById('fileName').textContent = file.name;
+    document.getElementById('filePreview').style.display = 'flex';
+});
+
+function removeSelectedFile() {
+    selectedFile = null;
+    document.getElementById('fileUpload').value = '';
+    document.getElementById('filePreview').style.display = 'none';
+}
+
+// Voice recording
+async function toggleVoiceRecording() {
+    if (isRecording) {
+        stopVoiceRecording();
+    } else {
+        await startVoiceRecording();
+    }
+}
+
+async function startVoiceRecording() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+
+        mediaRecorder.ondataavailable = (e) => {
+            if (e.data.size > 0) audioChunks.push(e.data);
+        };
+
+        mediaRecorder.onstop = () => {
+            stream.getTracks().forEach(t => t.stop());
+            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            processVoiceRecording(audioBlob);
+        };
+
+        mediaRecorder.start();
+        isRecording = true;
+        voiceSeconds = 0;
+        document.getElementById('voiceBtn').classList.add('recording');
+        document.getElementById('voicePreview').style.display = 'flex';
+        document.getElementById('voiceStatus').textContent = 'Recording...';
+        voiceTimerInterval = setInterval(() => {
+            voiceSeconds++;
+            const min = Math.floor(voiceSeconds / 60);
+            const sec = voiceSeconds % 60;
+            document.getElementById('voiceTimer').textContent = `${min}:${sec.toString().padStart(2, '0')}`;
+        }, 1000);
+
+        // Auto-stop after 60 seconds
+        setTimeout(() => {
+            if (isRecording) stopVoiceRecording();
+        }, 60000);
+    } catch (err) {
+        console.error('Microphone error:', err);
+        medicareAI.showNotification('Could not access microphone. Please allow microphone permission.', 'error');
+    }
+}
+
+function stopVoiceRecording() {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+    }
+    isRecording = false;
+    clearInterval(voiceTimerInterval);
+    document.getElementById('voiceBtn').classList.remove('recording');
+    document.getElementById('voiceStatus').textContent = 'Processing...';
+}
+
+async function processVoiceRecording(audioBlob) {
+    document.getElementById('voicePreview').style.display = 'none';
+
+    // Use Web Speech API for transcription
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        // Speech Recognition was running in parallel, but for MediaRecorder flow
+        // we play back and transcribe. Instead, let's use a simpler approach:
+        // convert to text using SpeechRecognition API directly.
+    }
+
+    // Fallback: prompt user to type if speech-to-text isn't available inline.
+    // We'll use a real-time SpeechRecognition approach instead.
+    medicareAI.showNotification('Voice recorded! Use the live transcription for best results.', 'info');
+}
+
+// Better approach: Use SpeechRecognition API for real-time transcription
+let speechRecognition = null;
+
+function initSpeechRecognition() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) return null;
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = navigator.language || 'en-US';
+
+    recognition.onresult = (event) => {
+        let transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            transcript += event.results[i][0].transcript;
+        }
+        document.getElementById('messageInput').value = transcript;
+    };
+
+    recognition.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        stopSpeechRecognition();
+        if (event.error === 'not-allowed') {
+            medicareAI.showNotification('Microphone access denied. Please allow it in browser settings.', 'error');
+        }
+    };
+
+    recognition.onend = () => {
+        if (isRecording) {
+            stopSpeechRecognition();
+        }
+    };
+
+    return recognition;
+}
+
+async function toggleVoiceRecording() {
+    if (isRecording) {
+        stopSpeechRecognition();
+    } else {
+        startSpeechRecognition();
+    }
+}
+
+function startSpeechRecognition() {
+    speechRecognition = initSpeechRecognition();
+    if (!speechRecognition) {
+        medicareAI.showNotification('Speech recognition is not supported in this browser. Try Chrome.', 'error');
+        return;
+    }
+    speechRecognition.start();
+    isRecording = true;
+    voiceSeconds = 0;
+    document.getElementById('voiceBtn').classList.add('recording');
+    document.getElementById('voicePreview').style.display = 'flex';
+    document.getElementById('voiceStatus').textContent = 'Listening...';
+    voiceTimerInterval = setInterval(() => {
+        voiceSeconds++;
+        const min = Math.floor(voiceSeconds / 60);
+        const sec = voiceSeconds % 60;
+        document.getElementById('voiceTimer').textContent = `${min}:${sec.toString().padStart(2, '0')}`;
+    }, 1000);
+}
+
+function stopSpeechRecognition() {
+    if (speechRecognition) {
+        speechRecognition.stop();
+        speechRecognition = null;
+    }
+    isRecording = false;
+    clearInterval(voiceTimerInterval);
+    document.getElementById('voiceBtn').classList.remove('recording');
+    document.getElementById('voicePreview').style.display = 'none';
+}
+
+function addMessage(message, isUser = false, fileInfo = null) {
     const chatMessages = document.getElementById('chatMessages');
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
-    
+
+    let fileHtml = '';
+    if (fileInfo) {
+        fileHtml = `<div class="message-file-badge"><i class="fas fa-file-medical"></i> ${fileInfo}</div>`;
+    }
+
     if (isUser) {
-        messageDiv.innerHTML = `<strong>👤 You:</strong><br>${message}`;
+        messageDiv.innerHTML = `<strong>👤 You:</strong>${fileHtml}<br>${message}`;
     } else {
-        // Format AI response with proper line breaks
         const formattedMessage = message.replace(/\n/g, '<br>');
         messageDiv.innerHTML = `<strong>🤖 MEDICARE AI:</strong><br>${formattedMessage}`;
     }
-    
+
     chatMessages.appendChild(messageDiv);
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
@@ -137,21 +553,39 @@ function hideTypingIndicator() {
 async function sendMessage() {
     const input = document.getElementById('messageInput');
     const message = input.value.trim();
-    
-    if (!message) return;
-    
-    // Add user message
+
+    if (!message && !selectedFile) return;
+
+    // If there's a file, send it via the analyze-report endpoint
+    if (selectedFile) {
+        const displayMsg = message || 'Analyze this medical report';
+        addMessage(displayMsg, true, selectedFile.name);
+        input.value = '';
+        const fileToSend = selectedFile;
+        removeSelectedFile();
+
+        showTypingIndicator();
+
+        try {
+            const response = await medicareAI.analyzeReport(fileToSend, displayMsg);
+            hideTypingIndicator();
+            addMessage(response);
+        } catch (error) {
+            hideTypingIndicator();
+            addMessage('Sorry, I encountered an error analyzing the file. Please try again.');
+            console.error('File analysis error:', error);
+        }
+        return;
+    }
+
+    // Regular text message
     addMessage(message, true);
     input.value = '';
-    
-    // Show typing indicator
+
     showTypingIndicator();
-    
+
     try {
-        // Get AI response from Gemini
         const response = await medicareAI.sendChatMessage(message);
-        
-        // Remove typing indicator and add AI response
         hideTypingIndicator();
         addMessage(response);
     } catch (error) {

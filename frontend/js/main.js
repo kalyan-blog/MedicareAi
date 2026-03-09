@@ -1,7 +1,9 @@
 // Main JavaScript file - Enhanced with better error handling
 class MedicareAI {
     constructor() {
-        this.apiBase = 'http://localhost:5000/api';
+        this.apiBase = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:5000/api'
+            : `${window.location.origin}/api`;
         this.currentUser = null;
         this.init();
     }
@@ -220,6 +222,31 @@ logout() {
         } catch (error) {
             console.error('Chat error:', error);
             return '❌ Sorry, I am unable to connect to the server. Please check if the backend is running on port 5000.';
+        }
+    }
+
+    async analyzeReport(file, message = '') {
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            if (message) formData.append('message', message);
+            if (this.currentUser?.id) formData.append('userId', this.currentUser.id);
+
+            const response = await fetch(`${this.apiBase}/analyze-report`, {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.error || 'Upload failed');
+            }
+
+            const data = await response.json();
+            return data.response;
+        } catch (error) {
+            console.error('Report analysis error:', error);
+            return '❌ Failed to analyze the report. Please try again or describe your report in text.';
         }
     }
 

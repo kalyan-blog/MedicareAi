@@ -7,8 +7,11 @@ node_modules/
 # Prisma generated
 backend/generated/
 
-# Lock files (optional - remove this line if you want to track package-lock.json)
+# Lock files
 package-lock.json
+
+# Uploads
+backend/uploads/
 
 # OS files
 Thumbs.db
@@ -17,3 +20,6 @@ Thumbs.db
 # IDE
 .vscode/
 .idea/
+
+# Uploads
+backend/uploads/

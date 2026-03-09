@@ -3,6 +3,9 @@ const cors = require('cors');
 const compression = require('compression');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 require('dotenv').config();
 const { PrismaClient } = require('@prisma/client');
@@ -39,14 +42,33 @@ initializeGemini();
 
 // Enhanced CORS configuration
 app.use(cors({
-  origin: ['http://localhost:5500', 'http://127.0.0.1:5500', 'http://localhost:3000', 'http://127.0.0.1:3000'],
+  origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : ['http://localhost:5500', 'http://127.0.0.1:5500', 'http://localhost:3000', 'http://127.0.0.1:3000'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-app.use(express.json());
+app.use(express.json({ limit: '20mb' }));
 app.use(compression());
+
+// Serve frontend static files
+app.use(express.static(path.join(__dirname, '..', 'frontend')));
+
+// Multer config for file uploads (max 10MB)
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = /jpeg|jpg|png|gif|webp|pdf/;
+    const ext = allowed.test(path.extname(file.originalname).toLowerCase());
+    const mime = allowed.test(file.mimetype.split('/').pop());
+    if (ext || mime || file.mimetype === 'application/pdf') cb(null, true);
+    else cb(new Error('Only images (JPEG, PNG, GIF, WebP) and PDF files are allowed'));
+  }
+});
 
 // Test database connection
 async function connectDatabase() {
@@ -71,11 +93,12 @@ You are MEDICARE AI, a medical assistant chatbot. Follow these rules strictly:
 5. Be empathetic and clear about limitations
 6. If unsure, say "I recommend consulting a healthcare professional"
 7. Keep responses concise but helpful (2-3 paragraphs maximum)
-8. Include warning: "⚠️ This is AI assistance, not medical diagnosis. Consult a doctor."
+8. Include warning: "⚠️ This is AI assistance, not medical diagnosis. Consult a doctor." (translate this warning too)
+9. DETECT the language of the user's question and RESPOND ENTIRELY in that SAME language. If the user writes in Hindi, respond in Hindi. If in Telugu, respond in Telugu. If in English, respond in English. Match the user's language exactly.
 
 User question: {USER_QUESTION}
 
-Provide helpful, safe medical information:
+Respond in the SAME language as the user's question above:
 `;
 
 // Enhanced chat function with Gemini AI
@@ -85,7 +108,8 @@ async function getGeminiResponse(userMessage) {
   }
 
   try {
-    const prompt = MEDICAL_SAFETY_PROMPT.replace('{USER_QUESTION}', userMessage);
+    const prompt = MEDICAL_SAFETY_PROMPT
+      .replace(/{USER_QUESTION}/g, userMessage);
     
     const result = await geminiModel.generateContent(prompt);
     const response = await result.response;
@@ -343,6 +367,90 @@ app.post('/api/user/:id/medical-record', async (req, res) => {
   }
 });
 
+// Analyze uploaded medical report with Gemini Vision
+app.post('/api/analyze-report', upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    const { message, userId } = req.body;
+    const file = req.file;
+
+    console.log(`📄 File uploaded: ${file.originalname} (${file.mimetype}, ${(file.size / 1024).toFixed(1)}KB)`);
+
+    let aiResponse;
+
+    if (geminiModel) {
+      try {
+        const userPrompt = message || 'Please analyze this medical report and provide key findings, observations, and any recommendations.';
+
+        const analysisPrompt = `${MEDICAL_SAFETY_PROMPT.replace(/{USER_QUESTION}/g, userPrompt)}\n\nThe patient has uploaded a medical report/image. Analyze it thoroughly and provide:\n1. Key findings from the report\n2. Any abnormal values or concerns\n3. General recommendations\n4. Whether they should consult a specialist\n\nRemember to include the medical safety disclaimer.`;
+
+        if (file.mimetype === 'application/pdf') {
+          // For PDF: send as inline data with pdf mime type
+          const base64Data = file.buffer.toString('base64');
+          const filePart = {
+            inlineData: {
+              data: base64Data,
+              mimeType: 'application/pdf'
+            }
+          };
+          const result = await geminiModel.generateContent([analysisPrompt, filePart]);
+          const response = await result.response;
+          aiResponse = response.text();
+        } else {
+          // For images: send as inline data
+          const base64Data = file.buffer.toString('base64');
+          const imagePart = {
+            inlineData: {
+              data: base64Data,
+              mimeType: file.mimetype
+            }
+          };
+          const result = await geminiModel.generateContent([analysisPrompt, imagePart]);
+          const response = await result.response;
+          aiResponse = response.text();
+        }
+
+        console.log('✅ Gemini Vision analysis complete');
+      } catch (geminiError) {
+        console.error('Gemini Vision error:', geminiError);
+        aiResponse = `I received your file (${file.originalname}) but encountered an issue analyzing it.\n\nPlease ensure:\n• The image is clear and readable\n• The file is a medical report, lab result, or prescription\n• The file is not corrupted\n\nYou can also try describing your report details in text, and I'll help interpret them.\n\n⚠️ This is AI assistance, not medical diagnosis. Consult a doctor.`;
+      }
+    } else {
+      aiResponse = `I received your file (${file.originalname}) but the AI analysis service is currently unavailable. Please try again later or describe your report in text.\n\n⚠️ Always consult healthcare professionals for medical report interpretation.`;
+    }
+
+    // Save to chat history if logged in
+    if (userId) {
+      try {
+        const user = await prisma.user.findUnique({
+          where: { id: parseInt(userId) },
+          select: { chatHistory: true }
+        });
+        let chatHistory = user.chatHistory || [];
+        chatHistory.push({
+          date: new Date().toISOString(),
+          query: `[File: ${file.originalname}] ${message || 'Analyze this report'}`,
+          response: aiResponse
+        });
+        await prisma.user.update({
+          where: { id: parseInt(userId) },
+          data: { chatHistory }
+        });
+      } catch (dbError) {
+        console.error('Error saving chat history:', dbError);
+      }
+    }
+
+    res.json({ response: aiResponse, fileName: file.originalname });
+  } catch (error) {
+    console.error('Report analysis error:', error);
+    res.status(500).json({ error: 'Failed to analyze report. Please try again.' });
+  }
+});
+
 // Test Gemini API endpoint
 app.get('/api/test-gemini', async (req, res) => {
   try {
@@ -395,27 +503,9 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
-// Root endpoint
-app.get('/', (req, res) => {
-  res.json({
-    message: '🚀 MEDICARE AI Backend Server with Gemini AI',
-    version: '1.0.0',
-    features: {
-      gemini_ai: geminiModel ? 'Active' : 'Inactive',
-      database: 'PostgreSQL',
-      authentication: 'JWT-based'
-    },
-    endpoints: {
-      health: '/api/health',
-      test_gemini: '/api/test-gemini',
-      register: '/api/register',
-      login: '/api/login',
-      chat: '/api/chat',
-      medicines: '/api/medicines',
-      diseases: '/api/diseases',
-      user: '/api/user/:id'
-    }
-  });
+// Catch-all: serve frontend index.html for non-API routes
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'frontend', 'index.html'));
 });
 
 app.listen(PORT, () => {
