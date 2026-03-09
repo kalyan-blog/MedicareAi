@@ -51,12 +51,17 @@ app.use(cors({
 app.use(express.json({ limit: '20mb' }));
 app.use(compression());
 
-// Serve frontend static files
-app.use(express.static(path.join(__dirname, '..', 'frontend')));
+// Serve frontend static files (local dev only, Vercel handles this)
+if (!process.env.VERCEL) {
+  app.use(express.static(path.join(__dirname, '..', 'frontend')));
+}
 
 // Multer config for file uploads (max 10MB)
-const uploadsDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+// Vercel has a read-only filesystem — only create uploads dir locally
+if (!process.env.VERCEL) {
+  const uploadsDir = path.join(__dirname, 'uploads');
+  if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+}
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -503,10 +508,12 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
-// Catch-all: serve frontend index.html for non-API routes
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'frontend', 'index.html'));
-});
+// Catch-all: serve frontend index.html for non-API routes (local dev only)
+if (!process.env.VERCEL) {
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'frontend', 'index.html'));
+  });
+}
 
 // Only listen when running directly (not on Vercel)
 if (!process.env.VERCEL) {
