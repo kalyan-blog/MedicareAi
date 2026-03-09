@@ -508,13 +508,19 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'frontend', 'index.html'));
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📍 Health check: http://localhost:${PORT}/api/health`);
-  console.log(`📍 Gemini test: http://localhost:${PORT}/api/test-gemini`);
-  console.log(`📍 Frontend should connect to: http://localhost:${PORT}`);
-  console.log(`🔑 Gemini API: ${process.env.GEMINI_API_KEY ? 'Configured' : 'Not configured'}`);
-});
+// Only listen when running directly (not on Vercel)
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`📍 Health check: http://localhost:${PORT}/api/health`);
+    console.log(`📍 Gemini test: http://localhost:${PORT}/api/test-gemini`);
+    console.log(`📍 Frontend should connect to: http://localhost:${PORT}`);
+    console.log(`🔑 Gemini API: ${process.env.GEMINI_API_KEY ? 'Configured' : 'Not configured'}`);
+  });
+}
+
+// Export for Vercel serverless
+module.exports = app;
 
 // Graceful shutdown
 process.on('SIGINT', async () => {

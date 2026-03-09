@@ -5,6 +5,7 @@
   "scripts": {
     "start": "cd backend && node server.js",
     "build": "cd backend && npm install && npx prisma generate",
+    "vercel-build": "cd backend && npm install && npx prisma generate",
     "dev": "cd backend && npm run dev"
   },
   "engines": {
